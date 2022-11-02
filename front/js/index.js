@@ -1,39 +1,41 @@
-const host = "http://localhost:3000/";
-const getUrl = host + "api/products/";
-let cardsFetch = function () {
-  fetch(getUrl)
-    .then((response) => response.json())
-    .then((data) => {
-      console.log(data);
-      let productSection = document.getElementById("items");
+fillSection();
 
-      for (i = 0; i < data.length; i++) {
-        displayList(data[i], productSection)
-      }
-    });
-};
-cardsFetch();
+async function getArticles() {
+    var articlesCatch = await fetch("http://localhost:3000/api/products")
+    return await articlesCatch.json();
+}
 
+async function fillSection() {
+    var result = await getArticles()
+        .then(function (resultatAPI) {
+            const articles = resultatAPI;
+            console.table(articles);
+            for (let article in articles) {
 
-function displayList(product, productSection) {
-  let linkTag = document.createElement('a')
-  linkTag.href = './product.html?id=' + product._id
+                let productLink = document.createElement("a");
+                document.querySelector(".items").appendChild(productLink);
+                productLink.href = `product.html?id=${resultatAPI[article]._id}`;
 
-  let articleTag = document.createElement('article')
+                let productArticle = document.createElement("article");
+                productLink.appendChild(productArticle);
 
-  let imgTag = document.createElement('img')
-  imgTag.src = product.imageUrl
-  imgTag.alt = product.altTxt
+                let productImg = document.createElement("img");
+                productArticle.appendChild(productImg);
+                productImg.src = resultatAPI[article].imageUrl;
+                productImg.alt = resultatAPI[article].altTxt;
 
-  let productName = document.createElement('h3')
-  productName.innerText = product.name
+                let productName = document.createElement("h3");
+                productArticle.appendChild(productName);
+                productName.classList.add("productName");
+                productName.innerHTML = resultatAPI[article].name;
 
-  let descProduct = document.createElement('p')
-  descProduct.innerText = product.description
-
-  productSection.appendChild(linkTag)
-  linkTag.appendChild(articleTag)
-  articleTag.appendChild(imgTag)
-  articleTag.appendChild(productName)
-  articleTag.appendChild(descProduct)
+                let productDescription = document.createElement("p");
+                productArticle.appendChild(productDescription);
+                productDescription.classList.add("productName");
+                productDescription.innerHTML = resultatAPI[article].description;
+            }
+        })
+        .catch(function (error) {
+            return error;
+        });
 }
