@@ -1,8 +1,10 @@
+"use strict";
+
 function main() {
     const idNode = document.getElementById("orderId");
-    idNode.innerText = localStorage.getItem("orderId");
-    console.log(localStorage.getItem("orderId"))
-    localStorage.clear();
+    var url = new URL(window.location.href);
+    var orderId = url.searchParams.get("orderId");
+    idNode.innerText = orderId;
 }
 
 main();
