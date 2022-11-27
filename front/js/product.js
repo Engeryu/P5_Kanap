@@ -48,6 +48,7 @@ function displayItems(article) {
         let productColors = document.createElement("option");
         document.querySelector("#colors").appendChild(productColors);
         productColors.value = colors;
+        productColors.setAttribute("value", colors)
         productColors.innerHTML = colors;
     }
     addToCart(article)
