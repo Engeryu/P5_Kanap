@@ -58,7 +58,7 @@ function addToCart(article) {
     const sendCartButton = document.querySelector("#addToCart");
 
     sendCartButton.addEventListener("click", (event) => {
-        if (quantityPicked.value > 0 && quantityPicked.value <= 100 && quantityPicked.value != 0) {
+        if (colorPicked.value && quantityPicked.value > 0 && quantityPicked.value <= 100 && quantityPicked.value != 0) {
 
             let colorChoice = colorPicked.value;
 
