@@ -1,38 +1,41 @@
 "use strict";
-
-let productLS = JSON.parse(localStorage.getItem("produit"))
 const positionEmptyCart = document.getElementById("cart__items")
 
-if (productLS === null || productLS == 0) {
-    const emptyCart = `<p>Votre panier est vide</p>`
-    positionEmptyCart.innerHTML = emptyCart
-} else {
-    let productTotalQty = document.getElementById('totalQuantity')
-    let totalQty = 0
-    let productTotalPrice = document.getElementById('totalPrice')
-    let totalPrice = 0
-    for (let produit of productLS) {
-        fetch("http://localhost:3000/api/products/" + produit.idProduit)
-            .then((res) => {
-                return res.json();
-            })
+function readCart() {
+    let productLS = JSON.parse(localStorage.getItem("produit"))
 
-            .then((data) => {
-                data['quantiteProduit'] = produit.quantiteProduit;
-                data['couleurProduit'] = produit.couleurProduit;
-                console.log(data)
-                displayCartProduct(data)
-            
-                totalQty += produit.quantiteProduit
-                totalPrice += produit.quantiteProduit * data.price
-                productTotalQty.innerHTML = totalQty            
-                productTotalPrice.innerHTML = totalPrice
+    if (productLS === null || productLS == 0) {
+        const emptyCart = `<p>Votre panier est vide</p>`
+        positionEmptyCart.innerHTML = emptyCart
+    } else {
+        positionEmptyCart.innerHTML = ''
+        let productTotalQty = document.getElementById('totalQuantity')
+        let totalQty = 0
+        let productTotalPrice = document.getElementById('totalPrice')
+        let totalPrice = 0
+        for (let produit of productLS) {
+            fetch("http://localhost:3000/api/products/" + produit.idProduit)
+                .then((res) => {
+                    return res.json();
+                })
 
-            })
-            .catch((error) => {
-                console.log("Erreur de la requête API");
-            })
+                .then((data) => {
+                    data['quantiteProduit'] = produit.quantiteProduit;
+                    data['couleurProduit'] = produit.couleurProduit;
+                    console.log(data)
+                    displayCartProduct(data)
 
+                    totalQty += parseInt(produit.quantiteProduit)
+                    totalPrice += produit.quantiteProduit * data.price
+                    productTotalQty.innerHTML = totalQty
+                    productTotalPrice.innerHTML = totalPrice
+
+                })
+                .catch((error) => {
+                    console.log("Erreur de la requête API : " + error);
+                })
+
+        }
     }
 }
 
@@ -66,7 +69,6 @@ function displayCartProduct(produit) {
     let productColor = document.createElement("p")
     productTitle.appendChild(productColor)
     productColor.innerHTML = produit.couleurProduit
-    productColor.style.fontSize = "20px"
 
     let productPrice = document.createElement("p")
     productItemContentTitlePrice.appendChild(productPrice)
@@ -92,49 +94,51 @@ function displayCartProduct(produit) {
     productQuantity.setAttribute("min", "1")
     productQuantity.setAttribute("max", "100")
     productQuantity.setAttribute("name", "itemQuantity")
-    productQuantity.addEventListener("change", (event) => {
-        event.preventDefault()
-        let qttModif = document.getElementsByClassName("itemQuantity")
-
-        for (let k = 0; k < qttModif.length; k++) {
-            qttModif[k]
-
-            let quantityModif = productLS[k].quantiteProduit
-            let qttModifValue = qttModif[k].valueAsNumber
-
-            const resultFind = productLS.find((element) => element.qttModifValue !== quantityModif)
-
-            resultFind.quantiteProduit = qttModifValue
-            productLS[k].quantiteProduit = resultFind.quantiteProduit
-
-            localStorage.setItem("produit", JSON.stringify(productLS))
-
-            location.reload()
-        }
+    productQuantity.addEventListener("change", function($event) {
+        $event.preventDefault()
+        
+        if (productQuantity.value > 0 && productQuantity.value <= 100) {
+            updateCart(produit._id, produit.couleurProduit, productQuantity.value)
+        } else {
+                alert("votre sélection est invalide !")
+                productQuantity.value = produit.quantiteProduit
+            }
     })
+    
+let productItemContentSettingsDelete = document.createElement("div")
+productItemContentSettings.appendChild(productItemContentSettingsDelete)
+productItemContentSettingsDelete.className = "cart__item__content__settings__delete"
 
-    let productItemContentSettingsDelete = document.createElement("div")
-    productItemContentSettings.appendChild(productItemContentSettingsDelete)
-    productItemContentSettingsDelete.className = "cart__item__content__settings__delete"
-
-    let productSupprimer = document.createElement("p")
-    productItemContentSettingsDelete.appendChild(productSupprimer)
-    productSupprimer.className = "deleteItem"
-    productSupprimer.innerHTML = "Supprimer"
-    productSupprimer.addEventListener("click", (event) => {
-        let btn_supprimer = document.getElementsByClassName("deleteItem")
-        for (let j = 0; j < btn_supprimer.length; j++) {
-            event.preventDefault()
-
-            let idDelete = productLS[j].idProduit
-            let colorDelete = productLS[j].couleurProduit
-
-            productLS = productLS.filter(element => element.idProduit !== idDelete || element.couleurProduit !== colorDelete)
-
-            localStorage.setItem("produit", JSON.stringify(productLS))
-
-            alert("Ce produit a bien été supprimé du panier")
-            location.reload()
-        }
+let productDelete = document.createElement("p")
+productItemContentSettingsDelete.appendChild(productDelete)
+productDelete.className = "deleteItem"
+productDelete.innerHTML = "Supprimer"
+productDelete.addEventListener("click", (event) => {
+    deleteCart(produit._id, produit.couleurProduit)
     })
 }
+
+function updateCart(id, couleur, qty) {
+    let cart = JSON.parse(localStorage.getItem('produit'))
+    for (let index in cart) {
+        if (cart[index].idProduit == id && cart[index].couleurProduit == couleur) {
+            cart[index].quantiteProduit = qty
+        } 
+    }
+    localStorage.setItem('produit', JSON.stringify(cart))
+    readCart()
+}
+
+function deleteCart(id, couleur) {
+    let cart = JSON.parse(localStorage.getItem('produit'))
+    for (let index in cart) {
+        if (cart[index].idProduit == id && cart[index].couleurProduit == couleur) {
+            cart.splice(index, 1)
+        } 
+    }
+    localStorage.setItem('produit', JSON.stringify(cart))
+    readCart()
+
+}
+
+readCart()
