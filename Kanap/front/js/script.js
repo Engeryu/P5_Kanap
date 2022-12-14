@@ -13,7 +13,7 @@ function postForm() {
         }
 
         validControl(contact)
-
+        let productLS = JSON.parse(localStorage.getItem("produit"))
         if (productLS == null) {
             alert("Pour passer commande, veuillez ajouter des produits à votre panier");
             event.preventDefault();
